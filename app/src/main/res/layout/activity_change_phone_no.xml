@@ -1,0 +1,115 @@
+<!--
+  ~ /*
+  ~    * Copyright 2014 Mobien Technologies Pvt. Ltd.
+  ~    *
+  ~    * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  ~    * use this file except in compliance with the License. You may obtain a copy of
+  ~    * the License at
+  ~    *
+  ~    * http://www.apache.org/licenses/LICENSE-2.0
+  ~    *
+  ~    * Unless required by applicable law or agreed to in writing, software
+  ~    * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  ~    * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  ~    * License for the specific language governing permissions and limitations under
+  ~    * the License.
+  ~    *
+  ~    * @author Basit Parkar
+  ~    * @date 7/6/14 6:33 PM
+  ~    */
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:paddingLeft="@dimen/activity_horizontal_margin"
+              android:paddingRight="@dimen/activity_horizontal_margin"
+              android:paddingTop="@dimen/activity_vertical_margin"
+              android:paddingBottom="@dimen/activity_vertical_margin"
+              android:orientation="vertical">
+
+
+    <customview.FloatingLabelSpinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/label_margin"
+        app:floatLabelTextAppearance="@style/TextAppearance.CustomView.FloatLabel"
+        >
+
+        <Spinner
+            android:id="@+id/spUserType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:prompt="@string/username"
+            android:singleLine="true"
+            />
+    </customview.FloatingLabelSpinner>
+
+
+    <customview.FloatingLabelLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/label_margin"
+        app:floatLabelTextAppearance="@style/TextAppearance.CustomView.FloatLabel">
+
+        <EditText
+            android:id="@+id/etNewUserName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/new_user_name"
+            android:imeOptions="actionNext"
+            android:inputType="phone"
+            android:maxLength="10"
+            android:singleLine="true"
+            />
+    </customview.FloatingLabelLayout>
+
+    <customview.FloatingLabelLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/label_margin"
+        app:floatLabelTextAppearance="@style/TextAppearance.CustomView.FloatLabel">
+
+        <EditText
+            android:id="@+id/etOldPhoneNo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/old_mob_no"
+            android:imeOptions="actionNext"
+            android:inputType="phone"
+            android:maxLength="10"
+            android:singleLine="true"
+            />
+    </customview.FloatingLabelLayout>
+
+    <customview.FloatingLabelLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/label_margin"
+        app:floatLabelTextAppearance="@style/TextAppearance.CustomView.FloatLabel">
+
+        <EditText
+            android:id="@+id/etNewPhoneNo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionNext"
+            android:hint="@string/new_mob_no"
+            android:inputType="phone"
+            android:maxLength="10"
+            android:singleLine="true"
+            />
+    </customview.FloatingLabelLayout>
+
+    <com.dd.CircularProgressButton
+        android:id="@+id/btnWithIcons1"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        app:cornerRadius="48dp"
+        app:iconComplete="@drawable/ic_action_accept"
+        app:iconError="@drawable/ic_action_cancel"
+        app:textIdle="@string/change_phoneno"/>
+
+</LinearLayout>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ /*
+  ~    * Copyright 2014 Mobien Technologies Pvt. Ltd.
+  ~    *
+  ~    * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  ~    * use this file except in compliance with the License. You may obtain a copy of
+  ~    * the License at
+  ~    *
+  ~    * http://www.apache.org/licenses/LICENSE-2.0
+  ~    *
+  ~    * Unless required by applicable law or agreed to in writing, software
+  ~    * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  ~    * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  ~    * License for the specific language governing permissions and limitations under
+  ~    * the License.
+  ~    *
+  ~    * @author Basit Parkar
+  ~    * @date 7/6/14 6:33 PM
+  ~    */
+  -->
+<resources>
+
+    <string name="app_name">Door Listener</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="copyright">Anvil Technologies Pvt. Ltd.</string>
+    <string name="login">Login</string>
+    <string name="user">User</string>
+    <string name="username">User name</string>
+    <string name="req_status">Request battery status</string>
+    <string name="open">OPEN</string>
+    <string name="closed">CLOSED</string>
+    <string name="partial">PARTIALLY OPEN</string>
+
+    <string-array name="user_type">
+        <item>@string/watchman</item>
+        <item>@string/owner</item>
+        <item>@string/anvil</item>
+    </string-array>
+
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+    <string name="watchman">Watchman</string>
+    <string name="owner">Owner</string>
+    <string name="anvil">Anvil</string>
+    <string name="title_activity_change_phone_no">Change Mobile Number</string>
+    <string name="sms_check_battery_status">BTR#%1$s</string>
+    <string name="sms_change_ph_no">CHU#%1$s#%2$s</string>
+    <string name="old_mob_no">Old Mobile No.</string>
+    <string name="new_mob_no">New Mobile No.</string>
+    <string name="new_user_name">New user name</string>
+    <string name="change_phoneno">Change Mobile No.</string>
+    <string name="title_activity_request_battery_status">Request Battery Status</string>
+    <string name="battery_status">Battery status </string>
+    <string name="title_activity_door_list">Door List</string>
+    <string name="title_activity_door_detail">Door Detail</string>
+    <string name="title_activity_dashboard">Dashboard</string>
+    <string name="password">Password</string>
+    <string name="check_batt_status">Check Battery Status</string>
+    <string name="change_ph_no">Change Phone Number</string>
+
+</resources>
