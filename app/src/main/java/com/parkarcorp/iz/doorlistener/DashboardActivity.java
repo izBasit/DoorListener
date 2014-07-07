@@ -1,6 +1,6 @@
 /*
  *
- *    * Copyright 2014 Mobien Technologies Pvt. Ltd.
+ *    * Copyright 2014 Basit Parkar.
  *    *
  *    * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  *    * use this file except in compliance with the License. You may obtain a copy of
@@ -14,14 +14,13 @@
  *    * License for the specific language governing permissions and limitations under
  *    * the License.
  *    *
- *    * @author Basit Parkar
- *    * @date 7/6/14 6:33 PM
+ *    * @date 7/7/14 1:02 PM
+ *    * @modified 7/7/14 12:57 PM
  *
  */
 
 package com.parkarcorp.iz.doorlistener;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -31,8 +30,9 @@ import android.widget.Button;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import utility.BaseActivity;
 
-public class DashboardActivity extends Activity {
+public class DashboardActivity extends BaseActivity {
     @InjectView(R.id.btnCheckBattery)
     Button btnCheckBattStatus;
 

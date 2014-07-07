@@ -1,6 +1,6 @@
 /*
  *
- *    * Copyright 2014 Mobien Technologies Pvt. Ltd.
+ *    * Copyright 2014 Basit Parkar.
  *    *
  *    * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  *    * use this file except in compliance with the License. You may obtain a copy of
@@ -14,8 +14,8 @@
  *    * License for the specific language governing permissions and limitations under
  *    * the License.
  *    *
- *    * @author Basit Parkar
- *    * @date 7/6/14 6:33 PM
+ *    * @date 7/7/14 1:02 PM
+ *    * @modified 7/7/14 12:57 PM
  *
  */
 
@@ -63,17 +63,6 @@ public class DbBackupRestore {
         }
     }
 
-    private void makeLogsFolder() {
-        try {
-            File sdFolder = new File(Environment.getExternalStorageDirectory()
-                    + "/database");
-            sdFolder.mkdirs();
-        }
-        catch (Exception e) {
-            // com.mobien.pmi.screen.Login.UTILITY.writeToSDFile(e.getMessage());
-        }
-    }
-
     private static void copy(File from, File to) throws FileNotFoundException,
             IOException {
         FileChannel src = null;
@@ -88,6 +77,17 @@ public class DbBackupRestore {
                 src.close();
             if (dst != null)
                 dst.close();
+        }
+    }
+
+    private void makeLogsFolder() {
+        try {
+            File sdFolder = new File(Environment.getExternalStorageDirectory()
+                    + "/database");
+            sdFolder.mkdirs();
+        }
+        catch (Exception e) {
+            // com.mobien.pmi.screen.Login.UTILITY.writeToSDFile(e.getMessage());
         }
     }
 }

@@ -1,6 +1,6 @@
 <!--
   ~ /*
-  ~    * Copyright 2014 Mobien Technologies Pvt. Ltd.
+  ~    * Copyright 2014 Basit Parkar.
   ~    *
   ~    * Licensed under the Apache License, Version 2.0 (the "License"); you may not
   ~    * use this file except in compliance with the License. You may obtain a copy of
@@ -14,8 +14,8 @@
   ~    * License for the specific language governing permissions and limitations under
   ~    * the License.
   ~    *
-  ~    * @author Basit Parkar
-  ~    * @date 7/6/14 6:33 PM
+  ~    * @date 7/7/14 1:02 PM
+  ~    * @modified 7/7/14 12:57 PM
   ~    */
   -->
 
@@ -23,30 +23,31 @@
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
+              android:divider="?android:attr/horizontalDivider"
+              android:orientation="vertical"
+              android:paddingBottom="@dimen/activity_vertical_margin"
               android:paddingLeft="@dimen/activity_horizontal_margin"
               android:paddingRight="@dimen/activity_horizontal_margin"
               android:paddingTop="@dimen/activity_vertical_margin"
-              android:paddingBottom="@dimen/activity_vertical_margin"
-              android:orientation="vertical"
-              android:divider="?android:attr/horizontalDivider"
               android:showDividers="middle"
               tools:context="com.parkarcorp.iz.doorlistener.watchman.DoorDetailActivity">
 
 
     <TextView
+        android:id="@+id/tvDoorName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Door 1"
         android:gravity="left|center_vertical"
+        android:text="Door 1"
+        android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/grey_clicked"
-        android:textStyle="bold"
-        android:id="@+id/tvDoorName"/>
+        android:textStyle="bold"/>
 
     <ListView
+        android:id="@+id/lvDoorDetail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/listView"
+        android:clickable="false"
         android:layout_gravity="center_horizontal"/>
 
 </LinearLayout>

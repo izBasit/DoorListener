@@ -1,6 +1,6 @@
 /*
  *
- *    * Copyright 2014 Mobien Technologies Pvt. Ltd.
+ *    * Copyright 2014 Basit Parkar.
  *    *
  *    * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  *    * use this file except in compliance with the License. You may obtain a copy of
@@ -14,8 +14,8 @@
  *    * License for the specific language governing permissions and limitations under
  *    * the License.
  *    *
- *    * @author Basit Parkar
- *    * @date 7/6/14 6:33 PM
+ *    * @date 7/7/14 1:02 PM
+ *    * @modified 7/7/14 12:57 PM
  *
  */
 
@@ -64,10 +64,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class DeviceUtility {
-    private Context mactivity;
     public static int signal_value;
-
-
+    private static int is_exception = 0;
+    int myLatitude, myLongitude;
+    private Context mactivity;
     private float level;
     private TelephonyManager telephonyManager = null;
     private GsmCellLocation cellLocation = null;
@@ -77,139 +77,9 @@ public class DeviceUtility {
     private String provider = "";
     private boolean UpdateCaught;
     private String providerUpdates = "0,0";
-    int myLatitude, myLongitude;
     private String longitude = "0", latitude = "0";
     private LocationManager mLocationManager = null;
     private Boolean needtoUpdate = true, is_AGPS_Require = false;
-    private static int is_exception = 0;
-    private MyPhoneStateListener Listener;
-
-    public DeviceUtility(Context context) {
-        mactivity = context;
-
-        level = -1;
-        telephonyManager = (TelephonyManager) mactivity.getSystemService(Context.TELEPHONY_SERVICE);
-
-        try {
-            cellLocation = (GsmCellLocation) telephonyManager.getCellLocation();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        Listener = new MyPhoneStateListener();
-        //	batteryLevel();
-        getSignalStrength();
-    }
-
-    public static int getSignal_value() {
-        return signal_value;
-    }
-
-    public static void setSignal_value(int signal_value) {
-        DeviceUtility.signal_value = signal_value;
-    }
-
-    public String get_MCC() {
-        String mcc = "0";
-        if (simPresent() == 1) {
-            if (!inAirplaneMode()) {
-                networkOperator = telephonyManager.getNetworkOperator();
-                System.out.println("Netwok operator " + networkOperator);
-                mcc = networkOperator.substring(0, 3);
-            }
-        }
-        return mcc;
-    }
-
-    public String get_MNC() {
-        String mnc = "0";
-        if (simPresent() == 1) {
-            if (!inAirplaneMode()) {
-                networkOperator = telephonyManager.getNetworkOperator();
-                System.out.println("Netwok operator " + networkOperator);
-                mnc = networkOperator.substring(3);
-            }
-        }
-        return mnc;
-    }
-
-    public int get_Cid() {
-        int cid = 0;
-        if (cellLocation != null)
-            cid = cellLocation.getCid();
-
-        return cid;
-    }
-
-    public int get_lac() {
-        int lac = 0;
-        if (cellLocation != null)
-            lac = cellLocation.getLac();
-
-        return lac;
-    }
-
-    public void set_Latitude(String lat) {
-        latitude = lat;
-    }
-
-    public void set_Longitude(String Long) {
-        longitude = Long;
-    }
-
-    public String get_latitude() {
-        return latitude;
-    }
-
-    public void set_BatteryLevel(float Level) {
-        level = Level;
-    }
-
-    public float get_BatteryLevel() {
-        return level;
-    }
-
-    public String get_longitude() {
-        return longitude;
-    }
-
-    public class Location_Progress extends AsyncTask<String, Void, Void> {
-
-        protected void onPreExecute() {
-            mLocationManager = (LocationManager) mactivity
-                    .getSystemService(Context.LOCATION_SERVICE);
-            if (!mLocationManager
-                    .isProviderEnabled(LocationManager.GPS_PROVIDER))
-                toggleGPS(false, mactivity);
-
-
-        }
-
-        @Override
-        protected Void doInBackground(String... params) {
-            // TODO Auto-generated method stub
-            is_exception = 1;
-            handler.sendEmptyMessage(0);
-            return null;
-        }
-
-        protected void onPostExecute(Void unused) {
-
-            toggleGPSOFF(false, mactivity);
-
-        }
-
-    }
-
-    public void getLocation(final Context c, boolean needtoUpdate, boolean is_AGPS_Require) {
-        this.mactivity = c;
-        this.needtoUpdate = needtoUpdate;
-        this.is_AGPS_Require = is_AGPS_Require;
-        new Location_Progress().execute();
-
-    }
-
     private Handler handler = new Handler() {
         public void handleMessage(Message msg9) {
 
@@ -364,6 +234,117 @@ public class DeviceUtility {
             }
         }
     };
+    private MyPhoneStateListener Listener;
+
+    public DeviceUtility(Context context) {
+        mactivity = context;
+
+        level = -1;
+        telephonyManager = (TelephonyManager) mactivity.getSystemService(Context.TELEPHONY_SERVICE);
+
+        try {
+            cellLocation = (GsmCellLocation) telephonyManager.getCellLocation();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Listener = new MyPhoneStateListener();
+        //	batteryLevel();
+        getSignalStrength();
+    }
+
+    public static int getSignal_value() {
+        return signal_value;
+    }
+
+    public static void setSignal_value(int signal_value) {
+        DeviceUtility.signal_value = signal_value;
+    }
+
+    public static boolean CheckNetConnectivity(Context mContext) {
+
+        ConnectivityManager connec = (ConnectivityManager) mContext
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connec.getNetworkInfo(0).getState() == State.CONNECTED
+                || connec.getNetworkInfo(1).getState() == State.CONNECTED)
+            return true;
+
+        return false;
+
+    }
+
+    public String get_MCC() {
+        String mcc = "0";
+        if (simPresent() == 1) {
+            if (!inAirplaneMode()) {
+                networkOperator = telephonyManager.getNetworkOperator();
+                System.out.println("Netwok operator " + networkOperator);
+                mcc = networkOperator.substring(0, 3);
+            }
+        }
+        return mcc;
+    }
+
+    public String get_MNC() {
+        String mnc = "0";
+        if (simPresent() == 1) {
+            if (!inAirplaneMode()) {
+                networkOperator = telephonyManager.getNetworkOperator();
+                System.out.println("Netwok operator " + networkOperator);
+                mnc = networkOperator.substring(3);
+            }
+        }
+        return mnc;
+    }
+
+    public int get_Cid() {
+        int cid = 0;
+        if (cellLocation != null)
+            cid = cellLocation.getCid();
+
+        return cid;
+    }
+
+    public int get_lac() {
+        int lac = 0;
+        if (cellLocation != null)
+            lac = cellLocation.getLac();
+
+        return lac;
+    }
+
+    public void set_Latitude(String lat) {
+        latitude = lat;
+    }
+
+    public void set_Longitude(String Long) {
+        longitude = Long;
+    }
+
+    public String get_latitude() {
+        return latitude;
+    }
+
+    public float get_BatteryLevel() {
+        return level;
+    }
+
+    public void set_BatteryLevel(float Level) {
+        level = Level;
+    }
+
+    public String get_longitude() {
+        return longitude;
+    }
+
+    public void getLocation(final Context c, boolean needtoUpdate, boolean is_AGPS_Require) {
+        this.mactivity = c;
+        this.needtoUpdate = needtoUpdate;
+        this.is_AGPS_Require = is_AGPS_Require;
+        new Location_Progress().execute();
+
+    }
 
     public String osVersion() {
         String version = System.getProperty("os.version");
@@ -534,7 +515,7 @@ public class DeviceUtility {
         } else {
             return false;
             /*
-			 * // check for roaming.. if airplane mode is on, there will be no
+             * // check for roaming.. if airplane mode is on, there will be no
 			 * // roaming. TelephonyManager tManager = (TelephonyManager)
 			 * mactivity .getSystemService(Context.TELEPHONY_SERVICE);
 			 * 
@@ -613,38 +594,6 @@ public class DeviceUtility {
         return signal_value;
     }
 
-    // signal strength
-    private class MyPhoneStateListener extends PhoneStateListener {
-
-        @Override
-        public void onSignalStrengthsChanged(SignalStrength signalStrength) {
-
-            // TODO Auto-generated method stub
-            super.onSignalStrengthsChanged(signalStrength);
-            // Method to get Signal Strength in %
-            int signalvalue = signalStrength.getGsmSignalStrength();
-            signal_value = (int) signalvalue * 100 / 31;
-            //Constants.SIGNAL_STRENGTH = per_value;
-            setSignal_value(signal_value);
-//			System.out.println("per_value in class = " + signal_value);
-        }
-
-    }
-
-    ;
-
-    public static boolean CheckNetConnectivity(Context mContext) {
-
-        ConnectivityManager connec = (ConnectivityManager) mContext
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connec.getNetworkInfo(0).getState() == State.CONNECTED
-                || connec.getNetworkInfo(1).getState() == State.CONNECTED)
-            return true;
-
-        return false;
-
-    }
-
     public void toggleGPS(boolean enable, Context mContext) {
         try {
             String provider = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
@@ -665,6 +614,8 @@ public class DeviceUtility {
             e.printStackTrace();
         }
     }
+
+    ;
 
     public void toggleGPSOFF(boolean enable, Context mContext) {
         try {
@@ -723,7 +674,7 @@ public class DeviceUtility {
                             result = true;
 
                         }
-							/*else
+                            /*else
 							{
 								OpenCellID opencellid=new OpenCellID();
 								try {
@@ -779,6 +730,84 @@ public class DeviceUtility {
         dataOutputStream.writeInt(0);
         dataOutputStream.writeInt(0);
         dataOutputStream.flush();
+    }
+
+    public boolean isWIFIconnected() {
+        ConnectivityManager conMan = (ConnectivityManager) mactivity
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        boolean isConnected = false;
+
+        // wifi
+        State wifi = conMan.getNetworkInfo(1).getState();
+        if (wifi == State.CONNECTED
+                || wifi == State.CONNECTING) {
+            isConnected = true;
+        }
+        return isConnected;
+    }
+
+    public boolean isWifiOn() {
+        ConnectivityManager conMan = (ConnectivityManager) mactivity
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+
+
+        // wifi
+        State wifi = conMan.getNetworkInfo(1).getState();
+        if (wifi == State.CONNECTED
+                || wifi == State.CONNECTING
+                || wifi == State.DISCONNECTING
+                || wifi == State.DISCONNECTED) {
+
+            return true;
+        }
+        return false;
+    }
+
+    public class Location_Progress extends AsyncTask<String, Void, Void> {
+
+        protected void onPreExecute() {
+            mLocationManager = (LocationManager) mactivity
+                    .getSystemService(Context.LOCATION_SERVICE);
+            if (!mLocationManager
+                    .isProviderEnabled(LocationManager.GPS_PROVIDER))
+                toggleGPS(false, mactivity);
+
+
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            // TODO Auto-generated method stub
+            is_exception = 1;
+            handler.sendEmptyMessage(0);
+            return null;
+        }
+
+        protected void onPostExecute(Void unused) {
+
+            toggleGPSOFF(false, mactivity);
+
+        }
+
+    }
+
+    // signal strength
+    private class MyPhoneStateListener extends PhoneStateListener {
+
+        @Override
+        public void onSignalStrengthsChanged(SignalStrength signalStrength) {
+
+            // TODO Auto-generated method stub
+            super.onSignalStrengthsChanged(signalStrength);
+            // Method to get Signal Strength in %
+            int signalvalue = signalStrength.getGsmSignalStrength();
+            signal_value = (int) signalvalue * 100 / 31;
+            //Constants.SIGNAL_STRENGTH = per_value;
+            setSignal_value(signal_value);
+//			System.out.println("per_value in class = " + signal_value);
+        }
+
     }
 
     public class OpenCellID {
@@ -855,39 +884,6 @@ public class DeviceUtility {
             }
 
         }
-    }
-
-
-    public boolean isWIFIconnected() {
-        ConnectivityManager conMan = (ConnectivityManager) mactivity
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        boolean isConnected = false;
-
-        // wifi
-        State wifi = conMan.getNetworkInfo(1).getState();
-        if (wifi == State.CONNECTED
-                || wifi == State.CONNECTING) {
-            isConnected = true;
-        }
-        return isConnected;
-    }
-
-    public boolean isWifiOn() {
-        ConnectivityManager conMan = (ConnectivityManager) mactivity
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-
-
-        // wifi
-        State wifi = conMan.getNetworkInfo(1).getState();
-        if (wifi == State.CONNECTED
-                || wifi == State.CONNECTING
-                || wifi == State.DISCONNECTING
-                || wifi == State.DISCONNECTED) {
-
-            return true;
-        }
-        return false;
     }
 }
 

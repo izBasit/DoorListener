@@ -1,6 +1,6 @@
 /*
  *
- *    * Copyright 2014 Mobien Technologies Pvt. Ltd.
+ *    * Copyright 2014 Basit Parkar.
  *    *
  *    * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  *    * use this file except in compliance with the License. You may obtain a copy of
@@ -14,25 +14,34 @@
  *    * License for the specific language governing permissions and limitations under
  *    * the License.
  *    *
- *    * @author Basit Parkar
- *    * @date 7/6/14 6:33 PM
+ *    * @date 7/7/14 1:02 PM
+ *    * @modified 7/7/14 12:57 PM
  *
  */
 
 package com.parkarcorp.iz.doorlistener.watchman;
 
-import android.app.Activity;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.parkarcorp.iz.doorlistener.R;
 
-import butterknife.InjectView;
+import java.util.ArrayList;
 
-public class DoorListActivity extends Activity {
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import database.DatabaseHelper;
+import utility.BaseActivity;
+import utility.DateUtil;
+
+public class DoorListActivity extends BaseActivity {
     @InjectView(R.id.tvDate)
     TextView tvDate;
 
@@ -43,6 +52,46 @@ public class DoorListActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_door_list);
+
+        ButterKnife.inject(this);
+        tvDate.setText(DateUtil.getDateTime());
+        new GetDoorList().execute();
+
+        lvDoorList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                final DoorListBean doorBean = (DoorListBean) lvDoorList.getItemAtPosition(position);
+
+                final Intent intent = new Intent(mContext, DoorDetailActivity.class);
+                intent.putExtra("DOOR_ID", doorBean.getDoorId());
+                intent.putExtra("DOOR_NAME", doorBean.getDoorName());
+                startActivity(intent);
+            }
+        });
+    }
+
+    private class GetDoorList extends AsyncTask<Void, Void, Void> {
+
+        private DoorListAdapter mAdapter;
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            final ArrayList<DoorListBean> mArr = DatabaseHelper.getInstance(mContext).getDoorList();
+            if (null != mArr && mArr.size() > 0) {
+                mAdapter = new DoorListAdapter(mArr, mContext);
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            if (null != mAdapter && mAdapter.getCount() > 0)
+                lvDoorList.setAdapter(mAdapter);
+        }
     }
 
 

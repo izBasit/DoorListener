@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ /*
-  ~    * Copyright 2014 Mobien Technologies Pvt. Ltd.
+  ~    * Copyright 2014 Basit Parkar.
   ~    *
   ~    * Licensed under the Apache License, Version 2.0 (the "License"); you may not
   ~    * use this file except in compliance with the License. You may obtain a copy of
@@ -15,8 +15,8 @@
   ~    * License for the specific language governing permissions and limitations under
   ~    * the License.
   ~    *
-  ~    * @author Basit Parkar
-  ~    * @date 7/6/14 6:33 PM
+  ~    * @date 7/7/14 1:02 PM
+  ~    * @modified 7/7/14 12:57 PM
   ~    */
   -->
 <resources>
@@ -24,7 +24,7 @@
     <string name="app_name">Door Listener</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="copyright">Anvil Technologies Pvt. Ltd.</string>
+    <string name="copyright">© 2014, Anvil Technologies Pvt. Ltd.</string>
     <string name="login">Login</string>
     <string name="user">User</string>
     <string name="username">User name</string>
@@ -45,8 +45,6 @@
     <string name="owner">Owner</string>
     <string name="anvil">Anvil</string>
     <string name="title_activity_change_phone_no">Change Mobile Number</string>
-    <string name="sms_check_battery_status">BTR#%1$s</string>
-    <string name="sms_change_ph_no">CHU#%1$s#%2$s</string>
     <string name="old_mob_no">Old Mobile No.</string>
     <string name="new_mob_no">New Mobile No.</string>
     <string name="new_user_name">New user name</string>
@@ -59,5 +57,19 @@
     <string name="password">Password</string>
     <string name="check_batt_status">Check Battery Status</string>
     <string name="change_ph_no">Change Phone Number</string>
+    <string name="title_activity_change_user_details">Modify User Details</string>
+    <string name="user_name">User Name</string>
+
+
+    <string name="sms_status">DST</string>
+    <string name="sms_power">DPW</string>
+    <string name="sms_critical_power">DPC</string>
+    <string name="sms_add_door">ADD</string>
+    <string name="sms_check_battery_status">BTR#%1$s</string>
+    <string name="sms_battery_status">BTS</string>
+    <string name="sms_change_ph_no">CHU#%1$s#%2$s</string>
+    <string name="door_status">%1$s is %2$s</string>
+    <string name="power_critical">%1$s/'s power is Critical</string>
+    <string name="battery_stat">%1$s has %2$s Hours of battery backup</string>
 
 </resources>

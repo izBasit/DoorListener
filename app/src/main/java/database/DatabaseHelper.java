@@ -1,6 +1,6 @@
 /*
  *
- *    * Copyright 2014 Mobien Technologies Pvt. Ltd.
+ *    * Copyright 2014 Basit Parkar.
  *    *
  *    * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  *    * use this file except in compliance with the License. You may obtain a copy of
@@ -14,8 +14,8 @@
  *    * License for the specific language governing permissions and limitations under
  *    * the License.
  *    *
- *    * @author Basit Parkar
- *    * @date 7/6/14 6:33 PM
+ *    * @date 7/7/14 1:02 PM
+ *    * @modified 7/7/14 12:57 PM
  *
  */
 
@@ -29,6 +29,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.parkarcorp.iz.doorlistener.admin.UserBean;
+import com.parkarcorp.iz.doorlistener.watchman.DoorDetailBean;
+import com.parkarcorp.iz.doorlistener.watchman.DoorListBean;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,24 +40,29 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
+import utility.DateUtil;
 import utility.LogUtility;
 
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
+    public static final String DATABASE_NAME = "mprescribe.db";
     private static final int DatabaseVersion = 1;
-    private static SQLiteDatabase sqLiteDb = null;
     /**
      * Package Name
      */
     private static final String PACKAGE = "com.mobien.mprescribe.mprescribe";
-    private Context mContext = null;
+    private static SQLiteDatabase sqLiteDb = null;
     private static String DB_OPEN_MODE = "C"; // C For Close, W for Write, R For
     // Read
     private static String TAG = "dbhelper";
     private static DatabaseHelper sInstance;
+    private Context mContext = null;
 
-    public static final String DATABASE_NAME = "mprescribe.db";
+    private DatabaseHelper(Context context) {
+        super(context, DATABASE_NAME, null, DatabaseVersion);
+        mContext = context;
+    }
 
     public static DatabaseHelper getInstance(Context context) {
         // Use the application context, which will ensure that you
@@ -62,11 +71,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             sInstance = new DatabaseHelper(context.getApplicationContext());
         }
         return sInstance;
-    }
-
-    private DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, DatabaseVersion);
-        mContext = context;
     }
 
     @Override
@@ -315,370 +319,82 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
-    public String getDocName() {
-        Cursor cursor = null;
-        String query = "SELECT USERNAME FROM USERINFO";
-        try {
-
-            cursor = ExecuteRawSql(query);
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                return cursor.getString(0);
-            }
-
-        }
-        catch (Exception e) {
-            LogUtility.NoteLog(e);
-        }
-        finally {
-            closeDB(cursor);
-        }
-        return "";
-
-    }
-
-    public String[] getDocInfo() {
-
-        Cursor cursor = null;
-        String query = "SELECT USERNAME, QUALIFICATION FROM USERINFO";
-        try {
-
-            cursor = ExecuteRawSql(query);
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                return new String[]{cursor.getString(0), cursor.getString(1)};
-            }
-
-        }
-        catch (Exception e) {
-            LogUtility.NoteLog(e);
-        }
-        finally {
-            closeDB(cursor);
-        }
-        return null;
-    }
-
     /**
-     * Get Doctor's details
-     * @return DocProfileBean
-     *//*
-    public DocProfileBean getDocDetails(){
-
-        Cursor cursor = null;
-        String query = "SELECT * FROM USERINFO";
-        try {
-
-            cursor = ExecuteRawSql(query);
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                DocProfileBean tempBean = new DocProfileBean(cursor.getString(0), cursor.getString(2),
-                        cursor.getString(3),cursor.getString(4), cursor.getString(5), cursor.getString(6), cursor.getString(7),
-                        cursor.getString(8), cursor.getString(2), cursor.getString(9));
-
-                return tempBean;
-            }
-
-        } catch (Exception e) {
-            LogUtility.NoteLog(e);
-        } finally {
-            closeDB(cursor);
-        }
-        return null;
-    }*/
-
-    /**
-     * Returns Last Visit Date and Transaction date
+     * Add a new Door
      *
-     * @param patientId Patient registration Id
-     * @return 0 - Transaction Id
-     * 1 - Visit Date.
+     * @param doorId
+     * @param doorName
+     * @return If door is added successfully
      */
-    public String[] getLastVisitPatientInfo(String patientId) {
+    public boolean addDoor(String doorId, String doorName) {
+        boolean executionStatus = false;
 
-        Cursor cursor = null;
-        String query = "SELECT TRANSACTION_ID, VISIT_DATE FROM PRESCRIPTION_HEADER WHERE PATIENT_ID = '" + patientId +
-                "' ORDER BY VISIT_DATE DESC";
+        doorId = (null == doorId || doorId.equals("")) ? DateUtil.getDateddMMyyyyHHmmSS() : doorId;
+        final String createdDate = DateUtil.getDateInddMMyyyyWithDash();
         try {
 
-            cursor = ExecuteRawSql(query);
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                return new String[]{cursor.getString(0), cursor.getString(1)};
-            }
+            String insertQuery = "INSERT INTO DOORHDR(DOOR_ID, DOOR_NAME,CREATED_DATE) " +
+                    "VALUES('" + doorId + "','" +
+                    doorName + "','" +
+                    createdDate + "')";
+            executionStatus = ExecuteSql(insertQuery);
 
         }
-        catch (Exception e) {
-            LogUtility.NoteLog(e);
+        catch (Exception ex) {
+            Log.d(TAG, "SQLite exception: " + ex.getLocalizedMessage());
+            LogUtility.NoteLog(ex);
         }
         finally {
-            closeDB(cursor);
+            closeDB(null);
+            return executionStatus;
         }
-        return null;
+
     }
 
     /**
-     * Get Prescription List.
-     * @param transactionId Last visit date's transaction id.
+     * Add a new Door
+     *
+     * @param doorId
+     * @param doorStatus
+     * @return If door detail is added successfully
+     */
+    public boolean addDoorDetail(String doorId, String doorStatus) {
+        boolean executionStatus = false;
+
+        final String createdDate = DateUtil.getDateInddMMyyyyWithDash();
+        try {
+            String insertQuery = "INSERT INTO DOORDTL(DOOR_ID, STATUS,DATE, TIME) " +
+                    "VALUES('" + doorId + "','" +
+                    doorStatus + "','" +
+                    createdDate + "','" +
+                    DateUtil.getCurrentTime() + "')";
+            executionStatus = ExecuteSql(insertQuery);
+
+        }
+        catch (Exception ex) {
+            Log.d(TAG, "SQLite exception: " + ex.getLocalizedMessage());
+            LogUtility.NoteLog(ex);
+        }
+        finally {
+            closeDB(null);
+            return executionStatus;
+        }
+
+    }
+
+
+    /**
+     * Update Door Alias
+     *
+     * @param doorId
+     * @param doorAlias
      * @return
-     *//*
-    public ArrayList<DosageBean> getLastVisitPrescriptionInfo(String transactionId){
-
-        final ArrayList<DosageBean> mArr = new ArrayList<DosageBean>();
-        Cursor cursor = null;
-        String query = "SELECT MOLECULE_NAME, DURATION, DOSAGE FROM PRESCRIPTION_DETAIL WHERE " +
-                "TRANSACTION_CODE = '"+transactionId+"';";
-        try {
-
-            cursor = ExecuteRawSql(query);
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                do {
-                    DosageBean tempBean = new DosageBean();
-                    tempBean.setMoleculeName(cursor.getString(0));
-                    tempBean.setDuration(cursor.getString(1));
-                    tempBean.setDosage(cursor.getString(2));
-
-                    mArr.add(tempBean);
-
-                } while (cursor.moveToNext());
-            }
-
-        } catch (Exception e) {
-            LogUtility.NoteLog(e);
-        } finally {
-            closeDB(cursor);
-        }
-        return mArr;
-    }
-
-
-    *//**
-     * Get Patient List.
-     * @return patient list
-     *//*
-    public ArrayList<PatientBean> getPatientList(){
-
-        final ArrayList<PatientBean> mArr = new ArrayList<PatientBean>();
-        Cursor cursor = null;
-        String query = "SELECT PATIENT_ID, PATIENT_NAME, PATIENT_AGE, LAST_VISIT_DATE FROM PATIENT_INFO ORDER BY PATIENT_NAME ASC;";
-        try {
-
-            cursor = ExecuteRawSql(query);
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                do {
-                    PatientBean tempBean = new PatientBean(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3));
-                    mArr.add(tempBean);
-
-                } while (cursor.moveToNext());
-            }
-
-        } catch (Exception e) {
-            LogUtility.NoteLog(e);
-        } finally {
-            closeDB(cursor);
-        }
-        return mArr;
-    }
-
-    *//**
-     * Get Patient details
-     * @param patientId patient Id
-     * @return
-     *//*
-    public PatientDetailsBean getPatientDetails(String patientId){
-
-        Cursor cursor = null;
-        String query = "SELECT * FROM PATIENT_INFO WHERE PATIENT_ID = '"+patientId+"'";
-        try {
-
-            cursor = ExecuteRawSql(query);
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                PatientDetailsBean tempBean = new PatientDetailsBean(cursor.getString(0), cursor.getString(1),cursor.getString(12),
-                        cursor.getString(2),cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6),
-                        cursor.getString(7), cursor.getString(8), cursor.getString(13));
-
-                return tempBean;
-            }
-
-        } catch (Exception e) {
-            LogUtility.NoteLog(e);
-        } finally {
-            closeDB(cursor);
-        }
-        return null;
-    }*/
-
-    /**
-     * Get Patient Name
-     *
-     * @param patientId
-     * @return patient name
      */
-    public String getPatientName(String patientId) {
-
-        Cursor cursor = null;
-        String query = "SELECT PATIENT_NAME FROM PATIENT_INFO WHERE PATIENT_ID = '" + patientId + "'";
-        try {
-
-            cursor = ExecuteRawSql(query);
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-
-                return cursor.getString(0);
-            }
-
-        }
-        catch (Exception e) {
-            LogUtility.NoteLog(e);
-        }
-        finally {
-            closeDB(cursor);
-        }
-        return null;
-    }
-
-    /**
-     * Get Patient header details
-     * @param patientId
-     * @return patient details
-     *//*
-    public PatientDetailsBean getPatientHeaderDetails(String patientId){
-
-        Cursor cursor = null;
-        String query = "SELECT HEIGHT, WEIGHT, PATIENT_AGE, BLOOD_PRESSURE FROM PATIENT_INFO WHERE PATIENT_ID = '"+patientId+"'";
-        try {
-
-            cursor = ExecuteRawSql(query);
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-
-                final PatientDetailsBean tempBean = new PatientDetailsBean();
-                tempBean.setHeight(cursor.getString(0));
-                tempBean.setWeight(cursor.getString(1));
-                tempBean.setAge(cursor.getString(2));
-                tempBean.setBloodPressure(cursor.getString(3));
-
-                return tempBean;
-            }
-
-        } catch (Exception e) {
-            LogUtility.NoteLog(e);
-        } finally {
-            closeDB(cursor);
-        }
-        return null;
-    }
-
-    public boolean savePatientDetails(PatientDetailsBean patientDetailsBean) {
+    public boolean updateDoorAlias(String doorId, String doorAlias) {
         boolean executionStatus = false;
         try {
-
-            String insertQuery = "INSERT INTO PATIENT_INFO (PATIENT_NAME,DOB,GENDER,HEIGHT," +
-                    " WEIGHT,PHONE_NO,MEDICAL_HISTORY,ALLERGIES,FAMILY_HISTORY," +
-                    " PATIENT_AGE, BlOOD_PRESSURE, PATIENT_ID) VALUES('"+patientDetailsBean.getPatientName()+"','" +
-                    patientDetailsBean.getDob()+"','" +
-                    patientDetailsBean.getGender()+"','" +
-                    patientDetailsBean.getHeight()+"','" +
-                    patientDetailsBean.getWeight()+"','" +
-                    patientDetailsBean.getPhoneNo()+"','" +
-                    patientDetailsBean.getMedicalHistory()+"','" +
-                    patientDetailsBean.getAllergies()+"','" +
-                    patientDetailsBean.getFamilyHistory()+"','" +
-                    patientDetailsBean.getAge()+"','" +
-                    patientDetailsBean.getBloodPressure()+"','" +
-                    DateUtil.getDateddMMyyyyHHmmSS()+"')";
-
-            executionStatus = ExecuteSql(insertQuery);
-
-        } catch (Exception ex) {
-            Log.d(TAG, "SQLite exception: " + ex.getLocalizedMessage());
-            LogUtility.NoteLog(ex);
-        } finally {
-            closeDB(null);
-            return executionStatus;
-        }
-
-    }
-
-    *//**
-     * Save Prescription
-     * @param prescriptionBean
-     * @return Execution Status
-     *//*
-    public boolean savePrescriptionHeader(PrescriptionBean prescriptionBean) {
-        boolean executionStatus = false;
-
-        final String prescriptionId = DateUtil.getDateddMMyyyyHHmmSS();
-        final String prescriptionDate = DateUtil.getDateInddMMyyyyWithDash();
-        try {
-
-            String insertQuery = "INSERT INTO PRESCRIPTION_HEADER (TRANSACTION_ID,VISIT_DATE,PATIENT_ID) " +
-                    "VALUES('"+prescriptionId+"','" +
-                    prescriptionDate+"','" +
-                    prescriptionBean.getPatientId()+"')";
-            executionStatus = ExecuteSql(insertQuery);
-
-            if(executionStatus) {
-                updateLastVisitDate(prescriptionBean.getPatientId(), prescriptionDate);
-                final ArrayList<DosageBean> mArr = prescriptionBean.getDosage();
-                for(int i= 0; i < mArr.size(); i++) {
-                    savePrescriptionDetails(prescriptionId,mArr.get(i));
-                }
-            }
-
-        } catch (Exception ex) {
-            Log.d(TAG, "SQLite exception: " + ex.getLocalizedMessage());
-            LogUtility.NoteLog(ex);
-        } finally {
-            closeDB(null);
-            return executionStatus;
-        }
-
-    }
-
-    *//**
-     * Inserting dosage
-     * @param prescriptionId prescription / transaction id
-     * @param dosageBean dosage of medicine
-     * @return Execution Status
-     *//*
-    private boolean savePrescriptionDetails(String prescriptionId, DosageBean dosageBean) {
-        boolean executionStatus = false;
-        try {
-
-            String insertQuery = "INSERT INTO PRESCRIPTION_DETAIL (TRANSACTION_CODE,MOLECULE_NAME,DURATION,DOSAGE," +
-                    " REMARK ) VALUES('"+prescriptionId+"','" +
-                    dosageBean.getMoleculeName()+"','" +
-                    dosageBean.getDuration()+"','" +
-                    dosageBean.getDosage()+"','" +
-                    "')";
-            executionStatus = ExecuteSql(insertQuery);
-
-        } catch (Exception ex) {
-            Log.d(TAG, "SQLite exception: " + ex.getLocalizedMessage());
-            LogUtility.NoteLog(ex);
-        } finally {
-            closeDB(null);
-            return executionStatus;
-        }
-
-    }*/
-
-    /**
-     * Update Last Visit Details of patient
-     *
-     * @param patientId     patient id of patient who is to be updated
-     * @param lastVisitDate visit date
-     * @return Execution Status
-     */
-    private boolean updateLastVisitDate(String patientId, String lastVisitDate) {
-        boolean executionStatus = false;
-        try {
-            String updateQuery = "UPDATE PATIENT_INFO SET LAST_VISIT_DATE = '" + lastVisitDate + "'" +
-                    " WHERE PATIENT_ID = '" + patientId + "'";
+            String updateQuery = "UPDATE DOORHDR( SET DOOR_ALIAS = '" + doorAlias + "'" +
+                    " WHERE DOOR_ID = '" + doorId + "'";
 
             executionStatus = ExecuteSql(updateQuery);
 
@@ -694,57 +410,50 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
- /*   *//**
-     * Updating patient information
-     * @param patientDetailsBean Patient Info
-     * @param patientId patient id of patient who is to be updated
-     * @return Execution Status
-     *//*
-    public boolean updatePatientDetails(PatientDetailsBean patientDetailsBean, String patientId ) {
-            boolean executionStatus = false;
-            try {
-                String updateQuery = "UPDATE PATIENT_INFO SET PATIENT_NAME = '"+patientDetailsBean.getPatientName()+"'," +
-                        "DOB = '"+patientDetailsBean.getDob()+"'," +
-                        "GENDER = '"+patientDetailsBean.getGender()+"'," +
-                        "HEIGHT ='"+patientDetailsBean.getHeight()+"'," +
-                        " WEIGHT ='"+patientDetailsBean.getWeight()+"'," +
-                        "PHONE_NO ='"+patientDetailsBean.getPhoneNo()+"'," +
-                        "MEDICAL_HISTORY ='"+patientDetailsBean.getMedicalHistory()+"'," +
-                        "ALLERGIES ='"+patientDetailsBean.getAllergies()+"'," +
-                        "FAMILY_HISTORY ='"+patientDetailsBean.getFamilyHistory()+"',"+
-                        "PATIENT_AGE ='"+patientDetailsBean.getAge()+"'," +
-                        "BLOOD_PRESSURE ='"+patientDetailsBean.getBloodPressure()+"'" +
-                        " WHERE PATIENT_ID = '"+patientId+"'";
+    /**
+     * Change Phone No
+     * @param userId
+     * @param newPhNo
+     * @param userName
+     * @return
+     */
+    public boolean changePhoneNo(String userId, String newPhNo, String userName) {
+        boolean executionStatus = false;
+        try {
+            String updateQuery = "UPDATE USERS( SET USER_PHONE = '" + newPhNo + "', SET USER_NAME = '" + userName + "'" +
+                    " WHERE USER_ID = '" + userId + "'";
 
-                executionStatus = ExecuteSql(updateQuery);
+            executionStatus = ExecuteSql(updateQuery);
 
-            } catch (Exception ex) {
-                Log.d(TAG, "SQLite exception: " + ex.getLocalizedMessage());
-                LogUtility.NoteLog(ex);
-            } finally {
-                closeDB(null);
-                return executionStatus;
-            }
+        }
+        catch (Exception ex) {
+            Log.d(TAG, "SQLite exception: " + ex.getLocalizedMessage());
+            LogUtility.NoteLog(ex);
+        }
+        finally {
+            closeDB(null);
+            return executionStatus;
+        }
 
-        }*/
+    }
 
     /**
-     * Method to get drugs
+     * Door List
      *
-     * @return drug list.
+     * @return array list of door.
      */
-    public ArrayList<String> getDrugs() {
-        final ArrayList<String> mArr = new ArrayList<String>();
+    public ArrayList<DoorListBean> getDoorList() {
+        final ArrayList<DoorListBean> mArr = new ArrayList<DoorListBean>();
         Cursor cursor = null;
-        String query = "SELECT DISTINCT DRUG_NAME FROM DRUGS ORDER BY DRUG_NAME ASC;";
+        String query = "SELECT DISTINCT DH.DOOR_ID, DH.DOOR_NAME, DD.STATUS, DD.ENTRY_TIME FROM DOORHDR DH, DOORDTL DD WHERE DH.DOOR_ID = DD.DOOR_ID ORDER BY DH.DOOR_NAME ASC;";
         try {
 
             cursor = ExecuteRawSql(query);
             if (cursor.getCount() > 0) {
                 cursor.moveToFirst();
-
                 do {
-                    mArr.add(cursor.getString(0).trim());
+                    DoorListBean tempBean = new DoorListBean(cursor.getString(0), cursor.getString(1), cursor.getString(2),cursor.getString(3));
+                    mArr.add(tempBean);
                 } while (cursor.moveToNext());
             }
 
@@ -756,6 +465,92 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             closeDB(cursor);
         }
         return mArr;
+
+    }
+
+    /**
+     * Door Details
+     *
+     * @return array list of door details.
+     */
+    public ArrayList<DoorDetailBean> getDoorDetails(String doorId) {
+        final ArrayList<DoorDetailBean> mArr = new ArrayList<DoorDetailBean>();
+        Cursor cursor = null;
+        String query = "SELECT STATUS, ENTRY_TIME FROM DOORDTL WHERE DOOR_ID = '" + doorId + "'  ORDER BY ENTRY_DATE DESC, ENTRY_TIME DESC;";
+        try {
+
+            cursor = ExecuteRawSql(query);
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                do {
+                    DoorDetailBean tempBean = new DoorDetailBean(cursor.getString(0),cursor.getString(1));
+                    mArr.add(tempBean);
+                } while (cursor.moveToNext());
+            }
+
+        }
+        catch (Exception e) {
+            LogUtility.NoteLog(e);
+        }
+        finally {
+            closeDB(cursor);
+        }
+        return mArr;
+
+    }
+
+    /**
+     * User Details
+     * @return array list of door details.
+     */
+    public UserBean getUserDetails(String userId) {
+        Cursor cursor = null;
+        String query = "SELECT USER_ID, USER_NAME, USER_PHONE FROM USERS WHERE USER_ID = '"+userId+"'";
+        try {
+
+            cursor = ExecuteRawSql(query);
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+
+                return new UserBean(cursor.getString(0), cursor.getString(1),cursor.getString(2));
+            }
+
+        }
+        catch (Exception e) {
+            LogUtility.NoteLog(e);
+        }
+        finally {
+            closeDB(cursor);
+        }
+        return null;
+
+    }
+
+
+    /**
+     * Door Details
+     * @return array list of door details.
+     */
+    public String getDoorName(String doorId) {
+        Cursor cursor = null;
+        String query = "SELECT DOOR_NAME FROM DOORHDR WHERE DOOR_ID = '"+doorId+"'";
+        try {
+
+            cursor = ExecuteRawSql(query);
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+
+                return cursor.getString(0);
+            }
+
+        }
+        catch (Exception e) {
+            LogUtility.NoteLog(e);
+        }
+        finally {
+            closeDB(cursor);
+        }
+        return null;
 
     }
 }

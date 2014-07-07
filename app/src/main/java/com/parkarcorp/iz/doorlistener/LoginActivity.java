@@ -1,6 +1,6 @@
 /*
  *
- *    * Copyright 2014 Mobien Technologies Pvt. Ltd.
+ *    * Copyright 2014 Basit Parkar.
  *    *
  *    * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  *    * use this file except in compliance with the License. You may obtain a copy of
@@ -14,8 +14,8 @@
  *    * License for the specific language governing permissions and limitations under
  *    * the License.
  *    *
- *    * @author Basit Parkar
- *    * @date 7/6/14 6:33 PM
+ *    * @date 7/7/14 1:02 PM
+ *    * @modified 7/7/14 12:57 PM
  *
  */
 
@@ -25,12 +25,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -48,6 +50,9 @@ import utility.CustomToast;
 
 public class LoginActivity extends ActionBarActivity {
 
+    public final static String SAVED_PASSWORD = "com.iz.doorlistener.loginid";
+    public final static String APP_SHARED_PREF = "com.iz.doorlistener";
+    private final static String DEFAULT_PASSWORD = "anvil";
     @InjectView(R.id.spUserType)
     Spinner spUserType;
     @InjectView(R.id.btnLogin)
@@ -56,9 +61,7 @@ public class LoginActivity extends ActionBarActivity {
     EditText etPass;
     @InjectView(R.id.flPass)
     FloatingLabelLayout flPass;
-
     private Context mContext;
-
     /**
      * Flag denoting whether this is a fresh install or the user
      * already exists.
@@ -67,14 +70,8 @@ public class LoginActivity extends ActionBarActivity {
      */
     private boolean isFirstTime = false;
     private String mStoredPass;
-
     private DatabaseHelper mDbHelper;
-
     private SharedPreferences mSharedPrefs;
-    private final static String DEFAULT_PASSWORD = "anvil";
-    public final static String SAVED_PASSWORD = "com.iz.doorlistener.loginid";
-    public final static String APP_SHARED_PREF = "com.iz.doorlistener";
-
     private String selUserType = "";
 
 
@@ -176,5 +173,17 @@ public class LoginActivity extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Method to hide Keyboard
+     */
+    private void hideKeyboard() {
+        View focus = getCurrentFocus();
+        if (null != focus) {
+            IBinder binder = focus.getWindowToken();
+            InputMethodManager imeManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imeManager.hideSoftInputFromWindow(binder, 0);
+        }
     }
 }

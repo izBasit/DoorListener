@@ -1,6 +1,6 @@
 /*
  *
- *    * Copyright 2014 Mobien Technologies Pvt. Ltd.
+ *    * Copyright 2014 Basit Parkar.
  *    *
  *    * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  *    * use this file except in compliance with the License. You may obtain a copy of
@@ -14,8 +14,8 @@
  *    * License for the specific language governing permissions and limitations under
  *    * the License.
  *    *
- *    * @author Basit Parkar
- *    * @date 7/6/14 6:33 PM
+ *    * @date 7/7/14 1:02 PM
+ *    * @modified 7/7/14 12:57 PM
  *
  */
 
@@ -36,6 +36,8 @@ public class DateUtil {
 
     private static final SimpleDateFormat DEVICE_DATE_FORMAT = new SimpleDateFormat(
             "dd MMM, yyyy", Locale.US);
+    private static final int[] cumulDaysToMonth = {0, 31, 59, 90, 120, 151,
+            181, 212, 243, 273, 304, 334, 365};
 
     public static int dateDiff(Calendar fromDate, Calendar toDate) {
         return daysSinceEpoch(toDate) - daysSinceEpoch(fromDate);
@@ -68,9 +70,6 @@ public class DateUtil {
     public static boolean isLeapYear(int year) {
         return (year % 400 == 0) || ((year % 100 != 0) && (year % 4 == 0));
     }
-
-    private static final int[] cumulDaysToMonth = {0, 31, 59, 90, 120, 151,
-            181, 212, 243, 273, 304, 334, 365};
 
     public static boolean check_IsBefore(String date1, String date2) {
         boolean flag = false;
@@ -135,8 +134,7 @@ public class DateUtil {
      */
     public static String getDateTime() {
         Calendar c = Calendar.getInstance();
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:SS.SSS", Locale.US);
-        String formattedDate = formatter.format(c.getTime());
+        String formattedDate = DEVICE_DATE_FORMAT.format(c.getTime());
         String s = formattedDate;
         return s;
     }
@@ -146,7 +144,7 @@ public class DateUtil {
      */
     public static String getCurrentTime() {
         Calendar c = Calendar.getInstance();
-        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss", Locale.US);
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss a", Locale.US);
         String formattedDate = formatter.format(c.getTime());
         String s = formattedDate;
         return s;

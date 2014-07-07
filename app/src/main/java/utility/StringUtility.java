@@ -1,6 +1,6 @@
 /*
  *
- *    * Copyright 2014 Mobien Technologies Pvt. Ltd.
+ *    * Copyright 2014 Basit Parkar.
  *    *
  *    * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  *    * use this file except in compliance with the License. You may obtain a copy of
@@ -14,8 +14,8 @@
  *    * License for the specific language governing permissions and limitations under
  *    * the License.
  *    *
- *    * @author Basit Parkar
- *    * @date 7/6/14 6:33 PM
+ *    * @date 7/7/14 1:02 PM
+ *    * @modified 7/7/14 12:57 PM
  *
  */
 
@@ -172,6 +172,210 @@ public class StringUtility {
     }
 
     /*
+     * Convert String into hex
+     * @param String value
+     * @returns hex string
+     */
+    public static String stringToHex(String arg) {
+
+        byte[] theByteArray = arg.getBytes();
+        String hexstr = byteArrayToHexString(arg.getBytes());
+        return hexstr;
+
+    }
+
+    /*
+     * Convert byte array to hex string
+     * @param byte array
+     * @returns hex string from byte array
+     */
+    public static String byteArrayToHexString(byte[] b) {
+        StringBuffer sb = new StringBuffer(b.length * 2);
+        for (int i = 0; i < b.length; i++) {
+            int v = b[i] & 0xff;
+            if (v < 16) {
+                sb.append('0');
+            }
+            sb.append(Integer.toHexString(v));
+        }
+
+        return sb.toString().toUpperCase();
+    }
+
+    /*
+     *
+     * @param string message which need to be pad
+     * @param padded by String
+     * @param maximum length of String
+     * @returns padded String by padding string if it cross maximum limit
+     *
+     */
+    public static String padding(String msg, String pad, int maxLen) {
+        int msg_len = msg.trim().length();
+        String ret = "";
+        String padstr = "";
+
+        for (int i = 0; i < maxLen - msg_len; i++) {
+            padstr = padstr + pad;
+        }
+        ret = padstr.trim() + msg.trim();
+        return ret;
+
+    }
+
+    /*
+     * Encrypt the string
+     * @param String want to encrypt
+     * @returns encrypted string
+     */
+    public static String encrypt(String password) {
+
+        String new_pass = "";
+        new_pass = stringToHex(password);
+
+        String encryptedPass = "";
+        // get ascii code of each character and assign it
+        for (int i = 0; i < new_pass.length(); i++) {
+            char reply;
+            if (i != new_pass.length()) {
+                reply = new_pass.charAt(i);
+                int charVal = reply;
+                float charFloat = charVal;
+                charFloat = charFloat * 10;
+                charFloat = charFloat / 4;
+                charFloat = charFloat - 50;
+                charVal = (int) charFloat;
+                char charVal1 = (char) charVal;
+                encryptedPass = encryptedPass + charVal1;
+            }
+        }
+        return encryptedPass;
+    }
+
+    /*
+     * This will gives image base64 String
+     * @param bitmap
+     * @returns string which contain image of base64 String
+     */
+    public static String getImageStringFromBitmap(Bitmap bitmap) {
+        String imgBse64String = "";
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos);
+            byte[] image = baos.toByteArray();
+            imgBse64String = Base64.encodeToString(image, Base64.DEFAULT);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+        }
+        return imgBse64String;
+    }
+
+    /*
+     * This method return bitmap from image path
+     * @param String of image path
+     * @param Context
+     * @returns bitmap of given image path
+     */
+    public static Bitmap getBitMapFromPath(String imgPath, Context mContext) {
+        Bitmap bitmap = null;
+        Log.i("MakeMachine", "onPhotoTaken");
+        ExifInterface exif;
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(imgPath, options);
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        ((Activity) mContext).getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+        int desiredWidth = displaymetrics.widthPixels + 40;
+        int srcWidth = options.outWidth;
+
+        int srcHeight = options.outHeight;
+
+        // Only scale if the source is big enough. This code is just trying to
+        // fit a image into a certain width.
+        if (desiredWidth > srcWidth)
+            desiredWidth = srcWidth;
+
+        // Calculate the correct inSampleSize/scale value. This helps reduce
+        // memory use. It should be a power of 2
+        // from:
+        // http://stackoverflow.com/questions/477572/android-strange-out-of-memory-issue/823966#823966
+        int inSampleSize = 1;
+        while (srcWidth / 2 > desiredWidth) {
+            srcWidth /= 4;
+            srcHeight /= 2;
+            inSampleSize *= 2;
+        }
+
+        float desiredScale = (float) desiredWidth / srcWidth;
+
+        // Decode with inSampleSize
+        options.inJustDecodeBounds = false;
+        options.inDither = false;
+        options.inSampleSize = 8;
+        options.inScaled = false;
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+
+        bitmap = BitmapFactory.decodeFile(imgPath);
+
+        try {
+            exif = new ExifInterface(imgPath);
+
+            int exifOrientation = Integer.parseInt(exif
+                    .getAttribute(ExifInterface.TAG_ORIENTATION));
+            float rotate = 0;
+            switch (exifOrientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    rotate = 90;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    rotate = 180;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    rotate = 270;
+                    break;
+            }
+
+            if (rotate > 0) {
+                Matrix matrix = new Matrix();
+                matrix.postRotate(rotate);
+                // File file = new File(_path);
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+                        bitmap.getHeight(), matrix, true);
+                OutputStream outStream;
+                try {
+                    outStream = new FileOutputStream(imgPath);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 10, outStream);
+                }
+                catch (FileNotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+        catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        Log.i("MakeMachine", "onPhotoTaken");
+        return bitmap;
+    }
+
+    public static boolean IsAlphaNumeric(String strToTest) {
+        boolean status = false;
+        String regExForAlphaNemeric = "^[a-zA-Z0-9_]*$";
+
+        if (strToTest.matches(regExForAlphaNemeric))
+            status = true;
+
+        return status;
+    }
+
+    /*
      * This method filter text and disable special character only allow letter and digits
      * @param integer length to enter text
      * @returns InputFilter array
@@ -290,7 +494,6 @@ public class StringUtility {
         return FilterArraym;
     }
 
-
     /*
      * This will return double value with two round decimals
      * @param double value
@@ -311,108 +514,6 @@ public class StringUtility {
 
         DecimalFormat twoDForm = new DecimalFormat("#.###");
         return Double.valueOf(twoDForm.format(d));
-    }
-
-    /*
-     * Convert String into hex
-     * @param String value
-     * @returns hex string
-     */
-    public static String stringToHex(String arg) {
-
-        byte[] theByteArray = arg.getBytes();
-        String hexstr = byteArrayToHexString(arg.getBytes());
-        return hexstr;
-
-    }
-
-    /*
-     * Convert byte array to hex string
-     * @param byte array
-     * @returns hex string from byte array
-     */
-    public static String byteArrayToHexString(byte[] b) {
-        StringBuffer sb = new StringBuffer(b.length * 2);
-        for (int i = 0; i < b.length; i++) {
-            int v = b[i] & 0xff;
-            if (v < 16) {
-                sb.append('0');
-            }
-            sb.append(Integer.toHexString(v));
-        }
-
-        return sb.toString().toUpperCase();
-    }
-
-    /*
-     *
-     * @param string message which need to be pad
-     * @param padded by String
-     * @param maximum length of String
-     * @returns padded String by padding string if it cross maximum limit
-     *
-     */
-    public static String padding(String msg, String pad, int maxLen) {
-        int msg_len = msg.trim().length();
-        String ret = "";
-        String padstr = "";
-
-        for (int i = 0; i < maxLen - msg_len; i++) {
-            padstr = padstr + pad;
-        }
-        ret = padstr.trim() + msg.trim();
-        return ret;
-
-    }
-
-    /*
-     * Encrypt the string
-     * @param String want to encrypt
-     * @returns encrypted string
-     */
-    public static String encrypt(String password) {
-
-        String new_pass = "";
-        new_pass = stringToHex(password);
-
-        String encryptedPass = "";
-        // get ascii code of each character and assign it
-        for (int i = 0; i < new_pass.length(); i++) {
-            char reply;
-            if (i != new_pass.length()) {
-                reply = new_pass.charAt(i);
-                int charVal = reply;
-                float charFloat = charVal;
-                charFloat = charFloat * 10;
-                charFloat = charFloat / 4;
-                charFloat = charFloat - 50;
-                charVal = (int) charFloat;
-                char charVal1 = (char) charVal;
-                encryptedPass = encryptedPass + charVal1;
-            }
-        }
-        return encryptedPass;
-    }
-
-    /*
-     * This will gives image base64 String
-     * @param bitmap
-     * @returns string which contain image of base64 String
-     */
-    public static String getImageStringFromBitmap(Bitmap bitmap) {
-        String imgBse64String = "";
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos);
-            byte[] image = baos.toByteArray();
-            imgBse64String = Base64.encodeToString(image, Base64.DEFAULT);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-        }
-        return imgBse64String;
     }
 
     /*
@@ -438,98 +539,6 @@ public class StringUtility {
             Qty = String.valueOf(qty);
         return Qty;
 
-    }
-
-    /*
-     * This method return bitmap from image path
-     * @param String of image path
-     * @param Context
-     * @returns bitmap of given image path
-     */
-    public static Bitmap getBitMapFromPath(String imgPath, Context mContext) {
-        Bitmap bitmap = null;
-        Log.i("MakeMachine", "onPhotoTaken");
-        ExifInterface exif;
-
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(imgPath, options);
-        DisplayMetrics displaymetrics = new DisplayMetrics();
-        ((Activity) mContext).getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-        int desiredWidth = displaymetrics.widthPixels + 40;
-        int srcWidth = options.outWidth;
-
-        int srcHeight = options.outHeight;
-
-        // Only scale if the source is big enough. This code is just trying to
-        // fit a image into a certain width.
-        if (desiredWidth > srcWidth)
-            desiredWidth = srcWidth;
-
-        // Calculate the correct inSampleSize/scale value. This helps reduce
-        // memory use. It should be a power of 2
-        // from:
-        // http://stackoverflow.com/questions/477572/android-strange-out-of-memory-issue/823966#823966
-        int inSampleSize = 1;
-        while (srcWidth / 2 > desiredWidth) {
-            srcWidth /= 4;
-            srcHeight /= 2;
-            inSampleSize *= 2;
-        }
-
-        float desiredScale = (float) desiredWidth / srcWidth;
-
-        // Decode with inSampleSize
-        options.inJustDecodeBounds = false;
-        options.inDither = false;
-        options.inSampleSize = 8;
-        options.inScaled = false;
-        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-
-
-        bitmap = BitmapFactory.decodeFile(imgPath);
-
-        try {
-            exif = new ExifInterface(imgPath);
-
-            int exifOrientation = Integer.parseInt(exif
-                    .getAttribute(ExifInterface.TAG_ORIENTATION));
-            float rotate = 0;
-            switch (exifOrientation) {
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    rotate = 90;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    rotate = 180;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    rotate = 270;
-                    break;
-            }
-
-            if (rotate > 0) {
-                Matrix matrix = new Matrix();
-                matrix.postRotate(rotate);
-                // File file = new File(_path);
-                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
-                        bitmap.getHeight(), matrix, true);
-                OutputStream outStream;
-                try {
-                    outStream = new FileOutputStream(imgPath);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 10, outStream);
-                }
-                catch (FileNotFoundException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        }
-        catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-        Log.i("MakeMachine", "onPhotoTaken");
-        return bitmap;
     }
 
     /* This method is useful to convert web response into map
@@ -567,15 +576,5 @@ public class StringUtility {
 
         }
         return myMap1;
-    }
-
-    public static boolean IsAlphaNumeric(String strToTest) {
-        boolean status = false;
-        String regExForAlphaNemeric = "^[a-zA-Z0-9_]*$";
-
-        if (strToTest.matches(regExForAlphaNemeric))
-            status = true;
-
-        return status;
     }
 }

@@ -1,6 +1,8 @@
+
+
 /*
  *
- *    * Copyright 2014 Mobien Technologies Pvt. Ltd.
+ *    * Copyright 2014 Basit Parkar.
  *    *
  *    * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  *    * use this file except in compliance with the License. You may obtain a copy of
@@ -14,24 +16,45 @@
  *    * License for the specific language governing permissions and limitations under
  *    * the License.
  *    *
- *    * @author Basit Parkar
- *    * @date 7/6/14 6:33 PM
+ *    * @date 7/7/14 1:02 PM
+ *    * @modified 7/7/14 12:59 PM
  *
  */
 
 package com.parkarcorp.iz.doorlistener;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.telephony.SmsManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 
-public class ChangePhoneNo extends ActionBarActivity {
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import utility.BaseActivity;
+import utility.LogUtility;
+
+public class ChangePhoneNo extends BaseActivity {
+
+    @InjectView(R.id.spUser)
+    Spinner spUser;
+    @InjectView(R.id.etOldPhoneNo)
+    EditText etOldPhoneNo;
+    @InjectView(R.id.etNewPhoneNo)
+    EditText etNewPhoneNo;
+    @InjectView(R.id.llContainer)
+    LinearLayout llContainer;
+    @InjectView(R.id.btnSave)
+    com.dd.CircularProgressButton btnSave;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_phone_no);
+        ButterKnife.inject(this);
     }
 
 
@@ -52,5 +75,22 @@ public class ChangePhoneNo extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Method to send Message
+     *
+     * @param message
+     * @param number
+     */
+    private void sendMessage(String message, String number) {
+        try {
+            SmsManager sm = SmsManager.getDefault();
+            sm.sendTextMessage(number, null, message, null, null);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            LogUtility.NoteLog(ex);
+        }
     }
 }
